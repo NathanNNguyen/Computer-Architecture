@@ -2,13 +2,30 @@
 
 import sys
 
+LDI = 0b10000010
+PRN = 0b01000111
+HLT = 0b00000001
+
 
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        x = [0] * 25
+        self.ram = [0] * 256
+        self.reg = [0] * 8
+        # Program Counter, address of the currently executing instruction
+        self.pc = 0
+        self.running = False
+
+    # Memory Address Register (MAR) and the Memory Data Register (MDR):
+    # The MAR contains the address that is being read or written to.
+    # The MDR contains the data that was read or the data to write.
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+
+    def ram_write(self, MAR, MDR):
+        self.ram[MAR] = MDR
 
     def load(self):
         """Load a program into memory."""
@@ -19,12 +36,12 @@ class CPU:
 
         program = [
             # From print8.ls8
-            0b10000010,  # LDI R0,8
+            LDI,  # LDI R0,8
             0b00000000,
             0b00001000,
-            0b01000111,  # PRN R0
+            PRN,  # PRN R0
             0b00000000,
-            0b00000001,  # HLT
+            HLT,  # HLT
         ]
 
         for instruction in program:
@@ -60,6 +77,27 @@ class CPU:
 
         print()
 
+    def LDI(self):
+        num = self.ram_read(self.pc + 1)
+        val = self.ram_read(self.pc + 2)
+        self.reg[num] = val
+        self.pc += 3
+
+    def PRN(self):
+        num = self.ram_read(self.pc + 1)
+        print(self.reg[num])
+
+    def HLT(self):
+        self.running = False
+
     def run(self):
         """Run the CPU."""
-        pass
+        self.running = True
+        while self.running:
+            for ir in self.ram:
+                if ir == LDI:
+                    self.LDI()
+                elif ir == PRN:
+                    self.PRN()
+                elif ir == HLT:
+                    self.HLT()
