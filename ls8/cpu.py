@@ -32,21 +32,51 @@ class CPU:
 
         address = 0
 
+        if len(sys.argv) != 2:
+            print('Please use one of the text in examples!')
+            sys.exit(1)
+        try:
+            with open(sys.argv[1]) as f:
+                for line in f:
+                    line = line.strip()
+                    temp = line.split()
+                    print(temp)
+
+                    if len(temp) == 0:
+                        continue
+
+                    elif temp[0][0] == '#':
+                        continue
+                    try:
+                        self.ram[address] = int(temp[0], 2)
+                    except ValueError:
+                        print(f"Invalid number: {temp[0]}")
+                        sys.exit(1)
+
+                    address += 1
+
+        except FileNotFoundError:
+            print(f"Couldn't open {sys.argv[1]}")
+            sys.exit(2)
+
+        if address == 0:
+            print("Program was empty!")
+            sys.exit(3)
+
         # For now, we've just hardcoded a program:
+        # program = [
+        #     # From print8.ls8
+        #     LDI,  # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     PRN,  # PRN R0
+        #     0b00000000,
+        #     HLT,  # HLT
+        # ]
 
-        program = [
-            # From print8.ls8
-            LDI,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            PRN,  # PRN R0
-            0b00000000,
-            HLT,  # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -95,9 +125,9 @@ class CPU:
         self.running = True
         while self.running:
             for ir in self.ram:
-                if ir == LDI:
+                if ir == 0b10000010:
                     self.LDI()
-                elif ir == PRN:
+                elif ir == 0b01000111:
                     self.PRN()
-                elif ir == HLT:
+                elif ir == 0b00000001:
                     self.HLT()
