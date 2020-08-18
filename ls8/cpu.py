@@ -84,6 +84,13 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         # elif op == "SUB": etc
+        elif op == 'MUL':
+            # reg_at_a = self.reg[self.ram[reg_a]]
+            # reg_at_b = self.reg[self.ram[reg_b]]
+            # print(reg_at_a)
+            # reg_at_a *= reg_at_b
+            self.reg[self.ram[reg_a]] *= self.reg[self.ram[reg_b]]
+            self.pc += 3
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -120,6 +127,9 @@ class CPU:
     def HLT(self):
         self.running = False
 
+    def MUL(self):
+        self.alu('MUL', self.pc + 1, self.pc + 2)
+
     def run(self):
         """Run the CPU."""
         self.running = True
@@ -131,3 +141,5 @@ class CPU:
                     self.PRN()
                 elif ir == 0b00000001:
                     self.HLT()
+                elif ir == 0b10100010:
+                    self.MUL()
