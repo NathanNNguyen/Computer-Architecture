@@ -9,5 +9,3 @@ cpu = CPU()
 
 cpu.load()
 cpu.run()
-# print(cpu.ram[:10])
-# cpu.ADD()

@@ -5,6 +5,10 @@ import sys
 LDI = 0b10000010
 PRN = 0b01000111
 HLT = 0b00000001
+ADD = 0b10100000
+MUL = 0b10100010
+POP = 0b01000110
+PUSH = 0b01000101
 
 
 class CPU:
@@ -140,13 +144,13 @@ class CPU:
         self.running = True
         while self.running:
             for ir in self.ram:
-                if ir == 0b10000010:
+                if ir == LDI:
                     self.LDI()
-                elif ir == 0b01000111:
+                elif ir == PRN:
                     self.PRN()
-                elif ir == 0b00000001:
+                elif ir == HLT:
                     self.HLT()
-                elif ir == 0b10100010:
+                elif ir == MUL:
                     self.MUL()
-                elif ir == 0b10100000:
+                elif ir == ADD:
                     self.ADD()
