@@ -22,14 +22,16 @@ class CPU:
         self.pc = 0
         self.running = False
         self.reg[7] = 0xf4
-        self.branchtable = {}
-        self.branchtable[LDI] = self.LDI
-        self.branchtable[PRN] = self.PRN
-        self.branchtable[HLT] = self.HLT
-        self.branchtable[ADD] = self.ADD
-        self.branchtable[MUL] = self.MUL
-        self.branchtable[PUSH] = self.PUSH
-        self.branchtable[POP] = self.POP
+
+        self.branchtable = {
+            LDI: self.LDI,
+            PRN: self.PRN,
+            MUL: self.MUL,
+            ADD: self.ADD,
+            PUSH: self.PUSH,
+            POP: self.POP,
+            HLT: self.HLT
+        }
 
     # Memory Address Register (MAR) and the Memory Data Register (MDR):
     # The MAR contains the address that is being read or written to.
@@ -94,7 +96,8 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[self.ram[reg_a]] += self.reg[self.ram[reg_b]]
+            # self.reg[self.ram[reg_a]] += self.reg[self.ram[reg_b]]
+            self.reg[reg_a] += self.reg[reg_b]
             # print(self.reg[reg_a])
             self.pc += 3
         # elif op == "SUB": etc
@@ -174,4 +177,5 @@ class CPU:
         while self.running:
             ir = self.ram_read(self.pc)
             if ir in self.branchtable:
+                # print(ir, 'ir')
                 self.branchtable[ir]()
