@@ -21,6 +21,15 @@ class CPU:
         # Program Counter, address of the currently executing instruction
         self.pc = 0
         self.running = False
+        self.reg[7] = 0xf4
+        self.branchtable = {}
+        self.branchtable[LDI] = self.LDI
+        self.branchtable[PRN] = self.PRN
+        self.branchtable[HLT] = self.HLT
+        self.branchtable[ADD] = self.ADD
+        self.branchtable[MUL] = self.MUL
+        self.branchtable[PUSH] = self.PUSH
+        self.branchtable[POP] = self.POP
 
     # Memory Address Register (MAR) and the Memory Data Register (MDR):
     # The MAR contains the address that is being read or written to.
@@ -44,7 +53,6 @@ class CPU:
                 for line in f:
                     line = line.strip()
                     temp = line.split()
-                    print(temp)
 
                     if len(temp) == 0:
                         continue
@@ -91,10 +99,6 @@ class CPU:
             self.pc += 3
         # elif op == "SUB": etc
         elif op == 'MUL':
-            # reg_at_a = self.reg[self.ram[reg_a]]
-            # reg_at_b = self.reg[self.ram[reg_b]]
-            # print(reg_at_a)
-            # reg_at_a *= reg_at_b
             self.reg[self.ram[reg_a]] *= self.reg[self.ram[reg_b]]
             self.pc += 3
         else:
@@ -129,6 +133,7 @@ class CPU:
     def PRN(self):
         num = self.ram_read(self.pc + 1)
         print(self.reg[num])
+        self.pc += 2
 
     def HLT(self):
         self.running = False
@@ -139,18 +144,34 @@ class CPU:
     def ADD(self):
         self.alu('ADD', self.pc + 1, self.pc + 2)
 
+    def PUSH(self):
+        # Decrement stack pointer
+        self.reg[7] -= 1
+
+        # Get register value
+        num = self.ram_read(self.pc + 1)
+        value = self.reg[num]
+
+        address_to_push_to = self.reg[7]
+        self.ram[address_to_push_to] = value
+
+        self.pc += 2
+
+    def POP(self):
+        address_to_pop_from = self.reg[7]
+        value = self.ram[address_to_pop_from]
+
+        num = self.ram_read(self.pc + 1)
+        self.reg[num] = value
+
+        self.reg[7] += 1
+
+        self.pc += 2
+
     def run(self):
         """Run the CPU."""
         self.running = True
         while self.running:
-            for ir in self.ram:
-                if ir == LDI:
-                    self.LDI()
-                elif ir == PRN:
-                    self.PRN()
-                elif ir == HLT:
-                    self.HLT()
-                elif ir == MUL:
-                    self.MUL()
-                elif ir == ADD:
-                    self.ADD()
+            ir = self.ram_read(self.pc)
+            if ir in self.branchtable:
+                self.branchtable[ir]()
