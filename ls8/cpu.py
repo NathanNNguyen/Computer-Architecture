@@ -96,13 +96,11 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            # self.reg[self.ram[reg_a]] += self.reg[self.ram[reg_b]]
             self.reg[reg_a] += self.reg[reg_b]
-            # print(self.reg[reg_a])
             self.pc += 3
         # elif op == "SUB": etc
         elif op == 'MUL':
-            self.reg[self.ram[reg_a]] *= self.reg[self.ram[reg_b]]
+            self.reg[reg_a] *= self.reg[reg_b]
             self.pc += 3
         else:
             raise Exception("Unsupported ALU operation")
@@ -142,10 +140,14 @@ class CPU:
         self.running = False
 
     def MUL(self):
-        self.alu('MUL', self.pc + 1, self.pc + 2)
+        a = self.ram_read(self.pc + 1)
+        b = self.ram_read(self.pc + 2)
+        self.alu('MUL', a, b)
 
     def ADD(self):
-        self.alu('ADD', self.pc + 1, self.pc + 2)
+        a = self.ram_read(self.pc + 1)
+        b = self.ram_read(self.pc + 2)
+        self.alu('ADD', a, b)
 
     def PUSH(self):
         # Decrement stack pointer
