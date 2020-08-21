@@ -11,6 +11,10 @@ POP = 0b01000110
 PUSH = 0b01000101
 CALL = 0b01010000
 RET = 0b00010001
+CMP = 0b10100111
+JMP = 0b01010100
+JEQ = 0b01010101
+JNE = 0b01010110
 
 
 class CPU:
@@ -24,6 +28,7 @@ class CPU:
         self.pc = 0
         self.running = False
         self.reg[7] = 0xf4
+        self.fl = 0b00000000
 
         self.branchtable = {
             LDI: self.LDI,
@@ -34,7 +39,11 @@ class CPU:
             POP: self.POP,
             HLT: self.HLT,
             CALL: self.CALL,
-            RET: self.RET
+            RET: self.RET,
+            CMP: self.CMP,
+            JMP: self.JMP,
+            JEQ: self.JEQ,
+            JNE: self.JNE
         }
 
     # Memory Address Register (MAR) and the Memory Data Register (MDR):
