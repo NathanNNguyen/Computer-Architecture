@@ -217,6 +217,46 @@ class CPU:
         # # set pc to return address
         self.pc = address
 
+    def CMP(self):
+        # FL = 0b00000LGE
+        a = self.ram_read(self.pc + 1)
+        b = self.ram_read(self.pc + 2)
+        if self.reg[a] == self.reg[b]:
+            # E == 1
+            self.fl = 0b00000001
+        elif self.reg[a] < self.reg[b]:
+            # L == 1
+            self.fl = 0b00000100
+        elif self.reg[a] > self.reg[b]:
+            # G == 1
+            self.fl = 0b00000010
+        self.pc += 3
+        # print(bin(self.fl), 'flag')
+
+    def JMP(self):
+        address = self.ram_read(self.pc + 1)
+        self.pc = self.reg[address]
+
+    def JEQ(self):
+        # masking with 1 to check the other value
+        if self.AND(self.fl, 0b00000001) == 1:
+            self.JMP()
+        else:
+            self.pc += 2
+
+    def JNE(self):
+        # masking with 1 to check the other value
+        if self.AND(self.fl, 0b00000001) == 0:
+            self.JMP()
+        else:
+            self.pc += 2
+
+    def AND(self, a, b):
+        return a & b
+
+    def OR(self, a, b):
+        return a | b
+
     def run(self):
         """Run the CPU."""
         self.running = True
