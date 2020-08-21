@@ -9,6 +9,8 @@ ADD = 0b10100000
 MUL = 0b10100010
 POP = 0b01000110
 PUSH = 0b01000101
+CALL = 0b01010000
+RET = 0b00010001
 
 
 class CPU:
@@ -30,7 +32,9 @@ class CPU:
             ADD: self.ADD,
             PUSH: self.PUSH,
             POP: self.POP,
-            HLT: self.HLT
+            HLT: self.HLT,
+            CALL: self.CALL,
+            RET: self.RET
         }
 
     # Memory Address Register (MAR) and the Memory Data Register (MDR):
@@ -142,36 +146,67 @@ class CPU:
     def MUL(self):
         a = self.ram_read(self.pc + 1)
         b = self.ram_read(self.pc + 2)
-        self.alu('MUL', a, b)
+        self.reg[a] *= self.reg[b]
+        self.pc += 3
+        # print(a, 'a')
+        # print(b, 'b')
+        # self.alu('MUL', a, b)
 
     def ADD(self):
         a = self.ram_read(self.pc + 1)
         b = self.ram_read(self.pc + 2)
-        self.alu('ADD', a, b)
+        self.reg[a] += self.reg[b]
+        self.pc += 3
 
     def PUSH(self):
         # Decrement stack pointer
+        # print(self.reg, 'REG BEFORE')
         self.reg[7] -= 1
 
         # Get register value
         num = self.ram_read(self.pc + 1)
         value = self.reg[num]
 
-        address_to_push_to = self.reg[7]
-        self.ram[address_to_push_to] = value
+        # Store it on the stack
+        address = self.reg[7]
+        self.ram[address] = value
+        # print(self.reg, 'REG AFTER')
 
         self.pc += 2
 
     def POP(self):
+        # Get value from the top of the stack
+        # print(self.reg, 'POP ****** BEFORE')
         address_to_pop_from = self.reg[7]
         value = self.ram[address_to_pop_from]
 
+        # Get the register number and store the value there
         num = self.ram_read(self.pc + 1)
         self.reg[num] = value
 
+        # Increment the SP
         self.reg[7] += 1
-
+        # print(self.reg, 'POP ****** AFTER')
         self.pc += 2
+
+    def CALL(self):
+        # Where RET will return to
+        # we are going to add to the stack so decrement the stack pointer
+        address = self.pc + 2
+        self.reg[7] -= 1
+        self.ram[self.reg[7]] = address
+        # get address to call
+        reg_num = self.ram[self.pc + 1]
+        # assign the value in the register to the program counter
+        self.pc = self.reg[reg_num]
+
+    def RET(self):
+        # get the return address
+        address = self.ram[self.reg[7]]
+        # increment the stack pointer since a value was "popped"
+        self.reg[7] += 1
+        # # set pc to return address
+        self.pc = address
 
     def run(self):
         """Run the CPU."""
